@@ -10,27 +10,22 @@ is_tmux_automatic_start_enabled() {
 	[ "$auto_start_value" == "on" ]
 }
 
-is_osx() {
-	[ $(uname) == "Darwin" ]
-}
-
-is_systemd() {
-	[ $(ps -o comm= -p1) == 'systemd' ]
+get_service_type() {
+    if [ $(uname) == "Darwin" ]; then
+        return "osx"
+    elif [ $(ps -o comm= -p1) == 'systemd' ]; then
+        return "systemd"
+    elif [ ! -z $(which openrc-init) ]; then
+        return "openrc"
+    fi
 }
 
 main() {
+    local service=$(get_service_type)
 	if is_tmux_automatic_start_enabled; then
-		if is_osx; then
-			"$CURRENT_DIR/handle_tmux_automatic_start/osx_enable.sh"
-		elif is_systemd; then
-			"$CURRENT_DIR/handle_tmux_automatic_start/systemd_enable.sh"
-		fi
+			"$CURRENT_DIR/handle_tmux_automatic_start/${service}_enable.sh"
 	else
-		if is_osx; then
-			"$CURRENT_DIR/handle_tmux_automatic_start/osx_disable.sh"
-		elif is_systemd; then
-			"$CURRENT_DIR/handle_tmux_automatic_start/systemd_disable.sh"
-		fi
+			"$CURRENT_DIR/handle_tmux_automatic_start/${service}_disable.sh"
 	fi
 }
 main

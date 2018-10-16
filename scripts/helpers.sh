@@ -46,3 +46,13 @@ another_tmux_server_running_on_startup() {
 	# there are 2 tmux processes (current tmux server + 1) on tmux startup
 	[ "$(number_tmux_processes_except_current_server)" -gt 1 ]
 }
+
+run_cmd_as_su(){
+    local cmd=$1
+    if [ ! -z $(which sudo) ]; then
+        sudo $cmd
+        return
+    fi
+
+    su -c "$cmd" --
+}
